@@ -12,6 +12,7 @@ vector <Usuario*> usa{};
 Usuario* usuario;
 Pokemon* poke;
 ofstream archivo_pokemon("Pokemon.bin", ios::binary);
+ofstream archivo_usuarios("Usuarios.bin", ios::binary);
 
 int cuenta = 0;
 
@@ -33,7 +34,8 @@ void registro() {
         usa.push_back(usuario);
         menu_principal();
     }
-    else {
+    else
+    {
         bool cuenta_econtrada = false;
         for (size_t i = 0; i < usa.size(); i++)
         {
@@ -50,6 +52,12 @@ void registro() {
         {
             usuario = new Usuario(usario, contrasena, pokemon_conseguidos);
             usa.push_back(usuario);
+            //indice
+            int indice = usa.size();
+            //agregar usario
+            archivo_pokemon.write(usa[indice]->get_usario().c_str(), 100);
+            //agregar contrasenia
+            archivo_pokemon.write(usa[indice]->get_contrasenia().c_str(), 100);
             menu_principal();
         }
     }
@@ -239,8 +247,29 @@ void menu_principal() {
     }
 }
 
+void cargar_info() {
+    ifstream archivo_usuarios_leer("Usuarios.bin", ios::binary);
+    usa.clear();
+    char user[100]{};
+    char contrasenia[100]{};
+    int contiene = 0;
+    archivo_usuarios_leer.read(user, sizeof(user));
+    archivo_usuarios_leer.read(contrasenia, sizeof(contrasenia));
+    string user_copia = "";
+    string contrasenia_copia = "";
+    Usuario* usua = new Usuario(user, contrasenia, contiene);
+    usa.push_back(usua);
+    ifstream archivo_pokemon_leer("Pokemon.bin", ios::binary);
+    char nombre[100]{};
+    int nivel = 0;
+    int puntos_vida = 0;
+    char tipo[100]{};
+    int estadistica_especial = 0;
+}
+
 void menu()
 {
+    cargar_info();
     int opciones = 1;
     while (opciones != 0)
     {
