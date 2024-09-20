@@ -3,14 +3,19 @@ using namespace std;
 #include <string>
 #include <vector>
 #include "Usuario.h"
+#include "Pokemon.h"
+#include <fstream>
 
 vector <Pokemon*> poke_sin{};
 vector <Pokemon*> poke_asignado{};
 vector <Usuario*> usa{};
 Usuario* usuario;
 Pokemon* poke;
+ofstream archivo_pokemon("Pokemon.bin", ios::binary);
 
 int cuenta = 0;
+
+void menu_principal();
 
 void registro() {
     string usario = "";
@@ -26,6 +31,7 @@ void registro() {
     {
         Usuario* usuario = new Usuario(usario, contrasena, pokemon_conseguidos);
         usa.push_back(usuario);
+        menu_principal();
     }
     else {
         bool cuenta_econtrada = false;
@@ -36,6 +42,7 @@ void registro() {
                 cuenta_econtrada = true;
                 cuenta = i;
                 cout << "Ya tienes una seccion creada, iniciado con ella" << endl;
+                menu_principal();
                 break;
             }
         }
@@ -43,6 +50,7 @@ void registro() {
         {
             usuario = new Usuario(usario, contrasena, pokemon_conseguidos);
             usa.push_back(usuario);
+            menu_principal();
         }
     }
 }
@@ -65,6 +73,7 @@ void iniciar_seccion() {
             cuenta_econtrada = true;
             cuenta = i;
             cout << "Cuenta creada iniciado en ella" << endl;
+            menu_principal();
             break;
         }
         if (cuenta_econtrada == false)
@@ -93,6 +102,21 @@ void crear_pokemon(){
 
     poke = new Pokemon(nombre, nivel, puntos_vida, tipo, estadistica_especial);
     poke_sin.push_back(poke);
+    //indice
+    int indice = poke_sin.size();
+    //agregar nombre
+    archivo_pokemon.write(poke_sin[indice]->get_nombre().c_str(), 100);
+    //agregar nivel
+    int nivel_copia = poke_sin[indice]->get_nivel();
+    archivo_pokemon.write(reinterpret_cast<const char*>(&nivel_copia), sizeof(int));
+    //agregar puntos de vida
+    int puntos_vida_copia = poke_sin[indice]->get_puntos_vida();
+    archivo_pokemon.write(reinterpret_cast<const char*>(&puntos_vida_copia), sizeof(int));
+    //agregar tipos
+    archivo_pokemon.write(poke_sin[indice]->get_tipo().c_str(), 100);
+    // agregar estadisticas especiales
+    int estadisticas_especiales_copia = poke_sin[indice]->get_estadistica_especia();
+    archivo_pokemon.write(reinterpret_cast<const char*>(&estadisticas_especiales_copia), sizeof(int));
 }
 
 void listar_inagsignados() {
@@ -113,25 +137,6 @@ void listar_inagsignados() {
     }
 }
 
-/*void listar_asignados() {
-    if (poke_asignado.empty())
-    {
-        cout << "Aun no tienes ningun pokemon en tu equipo..." << endl;
-    }
-    else
-    {
-        cout << "---- Tu equipo ----" << endl;
-        for (size_t i = 0; i < poke_asignado.size(); i++)
-        {
-            cout << i << ". ";
-            poke_asignado[i]->mostrarinfo();
-            cout << endl;
-        }
-        cout << endl;
-    }
-}
-*/
-
 void captura_pokemon() {
     if (poke_sin.empty())
     {
@@ -139,7 +144,7 @@ void captura_pokemon() {
     }
     else
     {
-        int rango = poke_sin.size() - 1;
+        int rango = poke_sin.size();
         int cap = rand() % rango + 0;
         int locaptura =  rand() % 2 + 1;
         if (locaptura == 1)
@@ -148,8 +153,41 @@ void captura_pokemon() {
         }
         else if (locaptura == 2)
         {
-            cout << "Enhorabuena has capturado al pokemon";
+            cout << "Enhorabuena has capturado al pokemon" << endl;
             usa[cuenta]->agregarpokemon(*poke_sin[cap]);
+            poke_asignado.push_back(poke_sin[cap]);
+        }
+    }
+}
+
+void Dejar_pokemon() {
+    
+    if (poke_asignado.empty())
+    {
+        cout << "No puedes liberar ningun pokemon ya que no tienes ninguno en tu posecion" << endl;
+    }
+    else
+    {
+        int liberar_a = 0;
+        cout << "----- Tus pokemones ----" << endl;
+        for (size_t i = 0; i < poke_asignado.size(); i++)
+        {
+            cout << i << ". ";
+            poke_asignado[i]->mostrarinfo();
+            cout << endl;
+        }
+        cout << endl;
+        cout << "Coloque el indice del pokemon a liberar: ";
+        cin >> liberar_a;
+        if (liberar_a >= 0 && liberar_a < poke_asignado.size())
+        {
+            usa[cuenta]->eliminarPokemonDelEquipo(liberar_a);
+            poke_asignado.erase(poke_asignado.begin() + liberar_a);
+            cout << "Su pokemon ah sido liberado exitosamente..." << endl;
+        }
+        else
+        {
+            cout << "El indice brindado excede su limite de pokemones..." << endl;
         }
     }
 }
@@ -175,7 +213,7 @@ void menu_principal() {
             break;
         }
         case 1: {
-            listar_asignados();
+            usa[cuenta]->mostrarinfo();
             break;
         }
         case 2: {
@@ -191,14 +229,11 @@ void menu_principal() {
             break;
         }
         case 5: {
-
-            break;
-        }
-        case 6: {
-
+            Dejar_pokemon();
             break;
         }
         default:
+            cout << "Caracter invalido, porfavor vuelve a intentarlo..." << endl;
             break;
         }
     }
@@ -212,8 +247,6 @@ void menu()
         cout << "---- Menu ----" << endl
             << "1. Registro" << endl
             << "2. Iniciar seccion" << endl
-            << "3. Menu principal" << endl
-            << "4. Gestio pokemon" << endl
             << "0. Salir" << endl
             << "Cual desea elegir: ";
         cin >> opciones;
@@ -232,15 +265,8 @@ void menu()
             iniciar_seccion();
             break;
         }
-        case 3: {
-            menu_principal();
-            break;
-        }
-        case 4: {
-
-            break;
-        }
         default:
+            cout << "Caracter invalido, porfavor vuelve a intentarlo..." << endl;
             break;
         }
     }

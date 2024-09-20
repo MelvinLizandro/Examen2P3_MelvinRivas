@@ -35,5 +35,5 @@ void Pokemon::mostrarinfo() {
 		<< "Nivel: " << nivel << endl
 		<< "Puntos de vida: " << puntos_vida << endl
 		<< "Tipo: " << tipo << endl
-		<< "Estadisticas especiales: " << endl;
+		<< "Estadisticas especiales: " << estadistica_especial << endl;
 }

@@ -37,3 +37,7 @@ void Usuario::mostrarinfo() {
 void Usuario::agregarpokemon(const Pokemon& p) {
 	poke.push_back(p);
 }
+
+void Usuario::eliminarPokemonDelEquipo(int indice) {
+    poke.erase(poke.begin() + indice);
+}
