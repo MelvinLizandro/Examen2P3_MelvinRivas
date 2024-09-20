@@ -18,7 +18,7 @@ int cuenta = 0;
 void menu_principal();
 
 void registro() {
-   
+   //creando el usario
     string usario = "";
     string contrasena = "";
     int pokemon_conseguidos = 0;
@@ -30,6 +30,7 @@ void registro() {
 
     if (usa.empty())
     {
+        //lo añade al archivo .bin
         ofstream archivo_usuarios("Usuarios.bin", ios::binary);
         Usuario* usuario = new Usuario(usario, contrasena, pokemon_conseguidos);
         usa.push_back(usuario);
@@ -45,9 +46,11 @@ void registro() {
     }
     else
     {
+        //revisa que no el usario no exista
         bool cuenta_econtrada = false;
         for (size_t i = 0; i < usa.size(); i++)
         {
+            //si existe lo habre 
             if (usario == usa[i]->get_usario() && usario == usa[i]->get_contrasenia())
             {
                 cuenta_econtrada = true;
@@ -57,6 +60,7 @@ void registro() {
                 break;
             }
         }
+        //si no lo crea si no es el primero
         if (cuenta_econtrada == false)
         {
             ofstream archivo_usuarios("Usuarios.bin", ios::binary);
